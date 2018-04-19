@@ -14,9 +14,8 @@ Vagrant.configure("2") do |config|
   # boxes at https://vagrantcloud.com/search.
   config.vm.box = "ubuntu/xenial64"
   config.vm.define "chefserver" do |chefserver|
+    v.memory = 10240
     chefserver.vm.provision :shell, path: "installChefServer.sh"
-    # chefserver.vm.provision :shell, inline: "cat /vagrant/ansible.cfg > /etc/ansible/ansible.cfg"
-    # chefserver.vm.network "public_network", ip: "192.168.50.1",bridge: "en1: Wi-Fi (AirPort)"
   end
 
   # Disable automatic box update checking. If you disable this, then
