@@ -1,0 +1,80 @@
+启动 nodeos 节点
+启动方式一
+nodeos --config-dir=/home/vagrant/configdir  -p eos -e --plugin eosio::chain_api_plugin
+后台启动
+nohup nodeos \
+--config-dir=/home/vagrant/configdir -p eos -e \
+--plugin eosio::chain_api_plugin  \
+1>nodeos.log 2>&1 &
+
+nohup nodeos --config-dir=/home/vagrant/configdir \
+-e -p eosio \
+--plugin eosio::chain_api_plugin \
+--plugin eosio::account_history_api_plugin \
+1>nodeos.log 2>&1 &
+
+
+开启钱包管理进程
+keosd
+或者
+nohup keosd 1>keosd.log 2>&1 &  (错误和正常日志统一输入到keosd.log)
+cleos wallet create -n <wallet name>
+创建钱包
+vagrant@ubuntu-xenial:~$ cleos wallet create -n gabrielwu
+Creating wallet: gabrielwu
+Save password to use in the future to unlock this wallet.
+Without password imported keys will not be retrievable.
+"PW5JfhrbbGnbVtv4evPZp4mDQS5aU64UVUJtWiyN3KEcgSHTnALpb"
+
+创建Owner key
+vagrant@ubuntu-xenial:~$ cleos create key
+Private key: 5JuNVUW9581UFkcHUzSyXVnezfDWeYvsqpizwiM9nUvRhkfmj71
+Public key: EOS5v1hgwYP2dJveRi3iRu6DRXfRgnZE9j5ZGRMcAxdQEuWGkjbFY
+创建Active key
+vagrant@ubuntu-xenial:~$ cleos create key
+Private key: 5KQNridFuZEUbGbzXpn5iQg9S2LL7o9pmkn9Hq8tyhnvVh5VKGf
+Public key: EOS4up42q5kQ4cmsgxhmPSc2nd5acZtCL4CGi3k764nMPW6RZqwx1
+
+import key到钱包
+vagrant@ubuntu-xenial:~$ cleos wallet import -n gabrielwu 5JuNVUW9581UFkcHUzSyXVnezfDWeYvsqpizwiM9nUvRhkfmj71
+imported private key for: EOS5v1hgwYP2dJveRi3iRu6DRXfRgnZE9j5ZGRMcAxdQEuWGkjbFY
+vagrant@ubuntu-xenial:~$ cleos wallet import -n gabrielwu 5KQNridFuZEUbGbzXpn5iQg9S2LL7o9pmkn9Hq8tyhnvVh5VKGf
+imported private key for: EOS4up42q5kQ4cmsgxhmPSc2nd5acZtCL4CGi3k764nMPW6RZqwx1
+
+创建账户
+记住 eosio account 是eos节点启动时候初始化的账户。
+所以在创建新账号的时候采用eosio 。
+
+cleos -H localhost -p 8889 \
+create account eosio \
+gabrielwu \
+EOS5v1hgwYP2dJveRi3iRu6DRXfRgnZE9j5ZGRMcAxdQEuWGkjbFY \
+EOS4up42q5kQ4cmsgxhmPSc2nd5acZtCL4CGi3k764nMPW6RZqwx1
+
+查看钱包的keys
+vagrant@ubuntu-xenial:~$ cleos wallet keys
+vagrant@ubuntu-xenial:~$ cleos wallet keys
+[[
+    "EOS4up42q5kQ4cmsgxhmPSc2nd5acZtCL4CGi3k764nMPW6RZqwx1",
+    "5KQNridFuZEUbGbzXpn5iQg9S2LL7o9pmkn9Hq8tyhnvVh5VKGf"
+  ],[
+    "EOS5v1hgwYP2dJveRi3iRu6DRXfRgnZE9j5ZGRMcAxdQEuWGkjbFY",
+    "5JuNVUW9581UFkcHUzSyXVnezfDWeYvsqpizwiM9nUvRhkfmj71"
+  ],[
+    "EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
+    "5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3"
+  ]
+]
+
+
+如果wallet 都没有打开，list时候显示wallet为空。
+vagrant@ubuntu-xenial:~$ cleos wallet list
+Wallets:
+[]
+vagrant@ubuntu-xenial:~$ cleos wallet unlock -n gabrielwu
+password: Unlocked: gabrielwu
+vagrant@ubuntu-xenial:~$ cleos wallet list
+Wallets:
+[
+  "gabrielwu *"
+]
