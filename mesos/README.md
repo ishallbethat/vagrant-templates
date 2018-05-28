@@ -1,2 +1,1 @@
-### Chef Server Setup
-### Chef Nodes Setup 
+# Vagrant Setup for Mesos, Marathon and Zookeeper
