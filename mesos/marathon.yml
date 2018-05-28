@@ -1,0 +1,34 @@
+---
+- hosts: marathon
+  become: true
+  tasks:
+  - name: write /etc/hosts
+    copy:
+      src: hostsfile
+      dest: /etc/hosts
+  - name: write /etc/default/marathon
+    copy:
+      src: marathon.conf
+      dest: /etc/default/marathon
+  - shell: yum install java-1.8.0-openjdk-devel -y
+    ignore_errors: true
+  - shell: rpm -Uvh http://repos.mesosphere.com/el/7/noarch/RPMS/mesosphere-el-repo-7-1.noarch.rpm
+    ignore_errors: true
+
+  - shell: rpm -Uvh http://archive.cloudera.com/cdh4/one-click-install/redhat/6/x86_64/cloudera-cdh-4-0.x86_64.rpm
+    ignore_errors: true
+
+  - name: Install mesos
+    yum:
+      name: mesos
+      state: latest
+
+  - name: Install marathon
+    yum:
+      name: marathon
+      state: latest
+  - name: Start marathon
+    service:
+      name: marathon
+      state: started
+      enabled: yes

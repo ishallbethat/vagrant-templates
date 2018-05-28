@@ -1,0 +1,47 @@
+---
+- hosts: zk
+  become: true
+  handlers:
+    - name: restart zookeeper
+      service:
+        name: zookeeper-server
+        state: restarted
+
+  tasks:
+  - name: write /etc/hosts
+    copy:
+      src: hostsfile
+      dest: /etc/hosts
+    tags: files
+  - shell: yum install java-1.8.0-openjdk-devel -y
+    ignore_errors: true
+
+  - shell: rpm -Uvh http://archive.cloudera.com/cdh4/one-click-install/redhat/6/x86_64/cloudera-cdh-4-0.x86_64.rpm
+    ignore_errors: true
+
+  - name: Install zookeeper
+    yum:
+      name: zookeeper
+      state: latest
+
+  - name: Install zookeeper-server
+    yum:
+      name: zookeeper-server
+      state: latest
+
+  - shell: zookeeper-server-initialize --myid=1 --force
+    become_user: zookeeper
+
+  - name: Start zookeeper-server
+    service:
+      name: zookeeper-server
+      state: started
+      enabled: yes
+
+  - name: add zoo.cfg
+    lineinfile:
+      path:  /etc/zookeeper/conf/zoo.cfg
+      regexp: '^server.1=192.168.50.5:2888:3888$'
+      line: 'server.1=192.168.50.5:2888:3888'
+    notify:
+      - restart zookeeper

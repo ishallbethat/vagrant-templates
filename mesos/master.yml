@@ -1,0 +1,40 @@
+---
+- hosts: master
+  become: true
+  handlers:
+    - name: restart mesos
+      service:
+        name: mesos-master
+        state: restarted
+  tasks:
+  - name: write /etc/hosts
+    copy:
+      src: hostsfile
+      dest: /etc/hosts
+  - shell: rpm -Uvh http://repos.mesosphere.com/el/7/noarch/RPMS/mesosphere-el-repo-7-1.noarch.rpm
+    ignore_errors: true
+
+  - shell: rpm -Uvh http://archive.cloudera.com/cdh4/one-click-install/redhat/6/x86_64/cloudera-cdh-4-0.x86_64.rpm
+    ignore_errors: true
+
+  - name: Install mesos
+    yum:
+      name: mesos
+      state: latest
+  - name: Start mesos-master
+    service:
+      name: mesos-master
+      state: started
+      enabled: yes
+  - name: add hostname
+    copy:
+      content: '192.168.50.5'
+      dest: /etc/mesos-master/hostname
+    notify:
+      - restart mesos
+  - name: write /etc/mesos/zk
+    copy:
+      src: mesos-zk
+      dest: /etc/mesos/zk
+    notify:
+      - restart mesos

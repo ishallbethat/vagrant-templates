@@ -1,0 +1,63 @@
+---
+- hosts: slave02
+  become: true
+  handlers:
+    - name: restart mesos-slave
+      service:
+        name: mesos-slave
+        state: restarted
+      environment:
+        MESOS_MASTER: zk://192.168.50.2:2181/mesos
+  tasks:
+  - name: create /opt/mesos-slave
+    file:
+      path: /opt/mesos-slave
+      state: directory
+      mode: 0755
+  - name: write /etc/hosts
+    copy:
+      src: hostsfile
+      dest: /etc/hosts
+  - shell: rpm -Uvh http://repos.mesosphere.com/el/7/noarch/RPMS/mesosphere-el-repo-7-1.noarch.rpm
+    ignore_errors: true
+
+  - shell: rpm -Uvh http://archive.cloudera.com/cdh4/one-click-install/redhat/6/x86_64/cloudera-cdh-4-0.x86_64.rpm
+    ignore_errors: true
+
+  - name: Install mesos
+    yum:
+      name: mesos
+      state: latest
+  - name: Start mesos-slave
+    service:
+      name: mesos-slave
+      state: started
+      enabled: yes
+    environment:
+      MESOS_MASTER: zk://192.168.50.2:2181/mesos
+  - name: add hostname
+    copy:
+      content: '192.168.50.6'
+      dest: /etc/mesos-slave/hostname
+    notify:
+      - restart mesos-slave
+  - name: write /etc/mesos/zk
+    copy:
+      src: mesos-zk
+      dest: /etc/mesos/zk
+    notify:
+      - restart mesos-slave
+
+  - name: write /etc/mesos-slave/containerizers
+    copy:
+      src: containerizers
+      dest: /etc/mesos-slave/containerizers
+    notify:
+      - restart mesos-slave
+
+  - name: write /etc/mesos-slave/executor_registration_timeout
+    copy:
+      src: executor_registration_timeout
+      dest: /etc/mesos-slave/executor_registration_timeout
+    notify:
+      - restart mesos-slave
